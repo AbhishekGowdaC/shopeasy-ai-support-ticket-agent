@@ -6,11 +6,13 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
-    Integer
+    Integer,
+    ForeignKey, 
+    Float
 )
 
 from app.database.database import Base
-
+from sqlalchemy import Numeric, UniqueConstraint
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -119,4 +121,77 @@ class Ticket(Base):
     llm_total_tokens = Column(
         Integer,
         nullable=True
+    )
+
+class Approval(Base):
+    __tablename__ = "approvals"
+
+    id = Column(String, primary_key=True, index=True)
+
+    ticket_id = Column(
+        String,
+        ForeignKey("tickets.id"),
+        nullable=False,
+        index=True
+    )
+
+    action_type = Column(String(50), nullable=False)
+
+    amount = Column(Float, nullable=True)
+
+    status = Column(
+        String(30),
+        nullable=False,
+        default="PENDING"
+    )
+
+    reviewed_by = Column(String(100), nullable=True)
+
+    reviewed_at = Column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    reason = Column(Text, nullable=True)
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
+
+
+class Refund(Base):
+    __tablename__ = "refunds"
+
+    id = Column(String, primary_key=True, index=True)
+
+    approval_id = Column(
+        String,
+        ForeignKey("approvals.id"),
+        nullable=False,
+        unique=True
+    )
+
+    amount = Column(
+        Numeric(12, 2),
+        nullable=False
+    )
+
+    idempotency_key = Column(
+        String(100),
+        nullable=False,
+        unique=True
+    )
+
+    status = Column(
+        String(30),
+        nullable=False,
+        default="COMPLETED"
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
     )

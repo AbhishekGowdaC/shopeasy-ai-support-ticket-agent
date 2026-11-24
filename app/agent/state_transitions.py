@@ -26,6 +26,7 @@ ALLOWED_TRANSITIONS = {
     AgentState.RETRIEVING_INFORMATION: [
         AgentState.TOOL_EXECUTION,
         AgentState.RESPONSE_GENERATION,
+        AgentState.NEEDS_HUMAN_REVIEW,
         AgentState.FAILED
     ],
 
@@ -60,7 +61,6 @@ def validate_transition(current_state, next_state):
     return True
 
 
-# Determine next state based on classification
 def get_next_state(classification):
 
     if classification.requires_human:
